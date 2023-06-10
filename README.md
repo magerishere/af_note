@@ -1,7 +1,10 @@
 # af_note
 
-A new Flutter project.
+A simple note application by flutter
 
 ## Getting Started
 
-A simple note application by flutter
+- Pull from git
+- Run `flutter pub get`
+- Run `flutter run`
+- Enjoy it.
