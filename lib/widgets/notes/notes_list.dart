@@ -8,7 +8,7 @@ class NotesList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    void restoreNote(String id) {
+    void restoreNote(int id) {
       ScaffoldMessenger.of(context).clearSnackBars();
       ref.read(noteProvider.notifier).restoreNote(id);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -18,7 +18,7 @@ class NotesList extends ConsumerWidget {
       );
     }
 
-    void deleteNote(String id) {
+    void deleteNote(int id) {
       final forceDeleteFuture = Future.delayed(
         const Duration(seconds: 5),
       );
@@ -45,18 +45,26 @@ class NotesList extends ConsumerWidget {
     final asyncNotes = ref.watch(noteProvider);
     return asyncNotes.when(
       data: (notes) {
-        return ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-          itemCount: notes.length,
-          itemBuilder: (context, index) => NoteItem(
-            note: notes[index],
-            onDelete: (id) => deleteNote(id),
-          ),
-        );
+        return notes.isEmpty
+            ? const Center(
+                child: Text('You have no notes yet, add new one'),
+              )
+            : ListView.builder(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                itemCount: notes.length,
+                itemBuilder: (context, index) => NoteItem(
+                  note: notes[index],
+                  onDelete: (id) => deleteNote(id),
+                ),
+              );
       },
-      error: (err, stack) => const Center(
-          child: Text('Failed to fetch notes, please try again later')),
-      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, stack) => Center(
+        child: Text('Error: $err'),
+      ),
+      loading: () => const Center(
+        child: CircularProgressIndicator(),
+      ),
     );
   }
 }

@@ -35,7 +35,7 @@ class _AddNote extends ConsumerState<AddNote> {
     } else {
       ref
           .read(noteProvider.notifier)
-          .addNote(_enteredNote!, id: widget.note!.id);
+          .updateNote(widget.note!.id, _enteredNote!);
     }
 
     Navigator.of(context).pop();

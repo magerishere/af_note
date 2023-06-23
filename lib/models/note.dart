@@ -3,12 +3,12 @@ import 'package:uuid/uuid.dart';
 const _uuid = Uuid();
 
 class Note {
-  Note(this.text, {String? id}) : id = id ?? _uuid.v4();
+  Note(this.id, this.text);
 
-  final String id;
+  final int id;
   final String text;
 
-  factory Note.fromDB(Map<String, Object?> note) {
-    return Note(note['text'] as String, id: note['id'] as String);
+  factory Note.fromJson(Map<String, dynamic> data) {
+    return Note(data['id'], data['content']);
   }
 }

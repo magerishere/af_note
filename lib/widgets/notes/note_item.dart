@@ -6,7 +6,7 @@ class NoteItem extends StatelessWidget {
   const NoteItem({super.key, required this.note, required this.onDelete});
 
   final Note note;
-  final void Function(String id) onDelete;
+  final void Function(int id) onDelete;
 
   void _goToEditNoteScreen(BuildContext context) {
     Navigator.of(context).push(

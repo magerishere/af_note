@@ -1,13 +1,29 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:af_note/helpers/db.dart';
+import 'package:af_note/helpers/http.dart';
+import 'package:af_note/helpers/prefs.dart';
 import 'package:af_note/models/note.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AsyncNotes extends AsyncNotifier<List<Note>> {
   Future<List<Note>> _fetchNotes() async {
-    final notes = await DB().allNotes();
-    return notes.map((note) => Note.fromDB(note)).toList();
+    final isRecoveredDatabase =
+        await Prefs().getRecoveryOldDataInSqfliteToNewDatabaseMySql();
+    if (!isRecoveredDatabase) {
+      final oldNotes = await DB().allNotes();
+
+      for (final oldNote in oldNotes) {
+        await Http('notes').withBody({
+          'content': oldNote['text'],
+        }).post();
+      }
+      await Prefs().setRecoveryOldDataInSqfliteToNewDatabaseMySql(true);
+    }
+    final response = await Http('notes').get();
+    final List<dynamic> resData = jsonDecode(response.body)['data'];
+    return resData.map((item) => Note.fromJson(item)).toList();
   }
 
   @override
@@ -15,37 +31,44 @@ class AsyncNotes extends AsyncNotifier<List<Note>> {
     return _fetchNotes();
   }
 
-  Future<void> addNote(String text, {String? id}) async {
-    final note = Note(text, id: id);
+  Future<void> addNote(String text) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(
       () async {
-        if (id == null) {
-          await DB().insertNote(note);
-        } else {
-          await DB().updateNote(note);
-        }
+        await Http('notes').withBody({
+          'content': text,
+        }).post();
         return _fetchNotes();
       },
     );
   }
 
-  Future<void> removeNote(String id, {bool forceDelete = false}) async {
+  Future<void> updateNote(int id, String text) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      await Http('notes/$id').withBody({
+        'content': text,
+      }).patch();
+      return _fetchNotes();
+    });
+  }
+
+  Future<void> removeNote(int id, {bool forceDelete = false}) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       if (forceDelete) {
-        await DB().forceDelete(id);
+        await Http('notes/trashed/$id').delete();
       } else {
-        await DB().deleteNote(id);
+        await Http('notes/$id').delete();
       }
       return _fetchNotes();
     });
   }
 
-  Future<void> restoreNote(String id) async {
+  Future<void> restoreNote(int id) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      await DB().restoreNote(id);
+      await Http('notes/trashed/$id').patch();
       return _fetchNotes();
     });
   }
