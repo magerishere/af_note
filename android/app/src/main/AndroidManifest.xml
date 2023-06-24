@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.af_note">
+    package="ir.alikhoshkar.af_note">
+    <uses-permission android:name="android.permission.INTERNET"/>
    <application
         android:label="af_note"
         android:name="${applicationName}"
