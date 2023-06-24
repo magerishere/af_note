@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:af_note/enums/note_status.dart';
 import 'package:af_note/helpers/db.dart';
 import 'package:af_note/helpers/http.dart';
 import 'package:af_note/helpers/prefs.dart';
@@ -8,6 +9,8 @@ import 'package:af_note/models/note.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AsyncNotes extends AsyncNotifier<List<Note>> {
+  AsyncNotes();
+
   Future<List<Note>> _fetchNotes() async {
     final isRecoveredDatabase =
         await Prefs().getRecoveryOldDataInSqfliteToNewDatabaseMySql();
@@ -53,6 +56,16 @@ class AsyncNotes extends AsyncNotifier<List<Note>> {
     });
   }
 
+  Future<void> updateNoteStatus(int id, NoteStatus status) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      await Http('notes/$id').withBody({
+        "status": status.name,
+      }).patch();
+      return _fetchNotes();
+    });
+  }
+
   Future<void> removeNote(int id, {bool forceDelete = false}) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
@@ -74,6 +87,6 @@ class AsyncNotes extends AsyncNotifier<List<Note>> {
   }
 }
 
-final noteProvider = AsyncNotifierProvider<AsyncNotes, List<Note>>(
+final asyncNoteProvider = AsyncNotifierProvider<AsyncNotes, List<Note>>(
   () => AsyncNotes(),
 );

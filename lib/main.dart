@@ -14,7 +14,7 @@ final theme = ThemeData().copyWith(
 
 final kInitialDarkColorScheme = ColorScheme.fromSeed(
   brightness: Brightness.dark,
-  seedColor: Color.fromARGB(255, 43, 1, 56),
+  seedColor: const Color.fromARGB(255, 43, 1, 56),
 );
 
 final darkTheme = ThemeData.dark().copyWith(

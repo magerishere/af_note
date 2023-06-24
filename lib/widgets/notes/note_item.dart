@@ -1,12 +1,19 @@
+import 'package:af_note/enums/note_status.dart';
 import 'package:af_note/models/note.dart';
 import 'package:af_note/screens/add_note_screen.dart';
 import 'package:flutter/material.dart';
 
 class NoteItem extends StatelessWidget {
-  const NoteItem({super.key, required this.note, required this.onDelete});
+  const NoteItem({
+    super.key,
+    required this.note,
+    required this.onDelete,
+    required this.onAddTo,
+  });
 
   final Note note;
   final void Function(int id) onDelete;
+  final void Function(int id, NoteStatus status) onAddTo;
 
   void _goToEditNoteScreen(BuildContext context) {
     Navigator.of(context).push(
@@ -19,7 +26,23 @@ class NoteItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dismissible(
-      background: Container(color: Colors.black),
+      background: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Theme.of(context).colorScheme.primary,
+              Theme.of(context).colorScheme.onPrimary,
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        alignment: const Alignment(-0.75, 0),
+        child: Icon(
+          note.isActive ? Icons.archive : Icons.folder,
+          color: Theme.of(context).colorScheme.onPrimary,
+        ),
+      ),
       secondaryBackground: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -43,7 +66,8 @@ class NoteItem extends StatelessWidget {
           onDelete(note.id);
         }
         if (direction == DismissDirection.startToEnd) {
-          print('start');
+          onAddTo(
+              note.id, note.isActive ? NoteStatus.archive : NoteStatus.active);
         }
       },
       child: Card(

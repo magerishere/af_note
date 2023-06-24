@@ -1,5 +1,5 @@
 import 'package:af_note/models/note.dart';
-import 'package:af_note/providers/note_provider.dart';
+import 'package:af_note/providers/async_note_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -9,11 +9,11 @@ class AddNote extends ConsumerStatefulWidget {
   final Note? note;
   @override
   ConsumerState<ConsumerStatefulWidget> createState() {
-    return _AddNote();
+    return _AddNoteState();
   }
 }
 
-class _AddNote extends ConsumerState<AddNote> {
+class _AddNoteState extends ConsumerState<AddNote> {
   final _formKey = GlobalKey<FormState>();
   String? _enteredNote;
 
@@ -31,10 +31,10 @@ class _AddNote extends ConsumerState<AddNote> {
     }
     _formKey.currentState!.save();
     if (widget.note == null) {
-      ref.read(noteProvider.notifier).addNote(_enteredNote!);
+      ref.read(asyncNoteProvider.notifier).addNote(_enteredNote!);
     } else {
       ref
-          .read(noteProvider.notifier)
+          .read(asyncNoteProvider.notifier)
           .updateNote(widget.note!.id, _enteredNote!);
     }
 
